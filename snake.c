@@ -38,20 +38,32 @@ int main(int argc, char *argv[]) {
   WINDOW *win = newwin(WINDOW_SIZE, WINDOW_SIZE, 0, 0);
 
   while (true) {
+    // Clear the screen
+    (void)wclear(win);
+
     // Drawing
     (void)box(win, 0, 0);
     (void)mvwprintw(win, 0, 1, "Snake");
 
     (void)mvwprintw(win, head->y, head->x, "█");
 
-    // Clear the screen
-    (void)clear();
+    // Head movement
+    if (up == head->direction) head->y--;
+    if (down == head->direction) head->y++;
+    if (left == head->direction) head->x--;
+    if (right == head->direction) head->x++;
+
+    // Refresh the screen
     (void)refresh();
     (void)wrefresh(win);
 
     // Input handling
     char input = getch();
     if ('q' == input) break;
+    if ('w' == input && down != head->direction) head->direction = up;
+    if ('s' == input && up != head->direction) head->direction = down;
+    if ('a' == input && right != head->direction) head->direction = left;
+    if ('d' == input && left != head->direction) head->direction = right;
   }
 
   // Free all the snake's body parts
