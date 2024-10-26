@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define WINDOW_SIZE 30
 
@@ -26,6 +27,10 @@ int main(int argc, char *argv[]) {
   head->direction = right;
   head->next = NULL;
 
+  srand(time(0));
+  uint apple_x = rand() % (WINDOW_SIZE - 2) + 1;
+  uint apple_y = rand() % (WINDOW_SIZE - 2) + 1;
+
   (void)setlocale(LC_ALL, "");  // Add support to UTF-8 characters
   (void)initscr();              // Initialize Ncurses
   (void)curs_set(0);            // Hide the cursor
@@ -43,9 +48,16 @@ int main(int argc, char *argv[]) {
     // Drawing
     (void)box(win, 0, 0);                 // draw the borders of the window
     (void)mvwprintw(win, 0, 1, "Snake");  // Draw the title
+    (void)mvwprintw(win, apple_y, apple_x, "*");  // Draw the apple
     (void)mvwprintw(win, head->y, head->x, "█");  // Draw the snake's head
 
-    // Head movement
+    // Check apple-head collision
+    if (apple_y == head->y && apple_x == head->x) {
+      apple_x = rand() % (WINDOW_SIZE - 2) + 1;
+      apple_y = rand() % (WINDOW_SIZE - 2) + 1;
+    }
+
+    // Snake's head movement
     if (up == head->direction) head->y--;
     if (down == head->direction) head->y++;
     if (left == head->direction) head->x--;
