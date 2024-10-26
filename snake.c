@@ -6,13 +6,11 @@
 
 #define WINDOW_SIZE 30
 
-typedef enum { up, down, left, right } direction;
-
 // A node of a linked list
 typedef struct {
   uint x;
   uint y;
-  direction direction;
+  enum direction { up, down, left, right } direction;
   struct BodyPart *next;
 } BodyPart;
 
@@ -37,15 +35,15 @@ int main(int argc, char *argv[]) {
 
   WINDOW *win = newwin(WINDOW_SIZE, WINDOW_SIZE, 0, 0);
 
-  while (true) {
+  bool game_over = false;
+  while (!game_over) {
     // Clear the screen
     (void)wclear(win);
 
     // Drawing
-    (void)box(win, 0, 0);
-    (void)mvwprintw(win, 0, 1, "Snake");
-
-    (void)mvwprintw(win, head->y, head->x, "█");
+    (void)box(win, 0, 0);                 // draw the borders of the window
+    (void)mvwprintw(win, 0, 1, "Snake");  // Draw the title
+    (void)mvwprintw(win, head->y, head->x, "█");  // Draw the snake's head
 
     // Head movement
     if (up == head->direction) head->y--;
@@ -54,7 +52,6 @@ int main(int argc, char *argv[]) {
     if (right == head->direction) head->x++;
 
     // Refresh the screen
-    (void)refresh();
     (void)wrefresh(win);
 
     // Input handling
@@ -64,6 +61,11 @@ int main(int argc, char *argv[]) {
     if ('s' == input && up != head->direction) head->direction = down;
     if ('a' == input && right != head->direction) head->direction = left;
     if ('d' == input && left != head->direction) head->direction = right;
+
+    // Game over checking
+    if (head->x < 1 || head->x > WINDOW_SIZE - 2 || head->y < 1 ||
+        head->y > WINDOW_SIZE - 2)
+      game_over = true;
   }
 
   // Free all the snake's body parts
@@ -72,6 +74,14 @@ int main(int argc, char *argv[]) {
     BodyPart *temp = current_body_part;
     current_body_part = (BodyPart *)current_body_part->next;
     free(temp);
+  }
+
+  if (game_over) {
+    // Refresh the screen
+    (void)werase(win);
+    (void)wrefresh(win);
+    (void)printf("Game over :(");
+    (void)getchar();
   }
 
   (void)endwin();
