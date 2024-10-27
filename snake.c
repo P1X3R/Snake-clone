@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     new->next = (struct BodyPart *)head;
     head = new;
 
-    // TODO: Delete the last body part
+    // Delete the last body part
     BodyPart *last_body_part = head;
     BodyPart *penultimate_body_part = head;
     while (NULL != last_body_part->next) {
