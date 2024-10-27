@@ -51,10 +51,18 @@ int main(int argc, char *argv[]) {
     (void)mvwprintw(win, 0, 1, "Snake");  // Draw the title
     (void)mvwprintw(win, apple_y, apple_x, "*");  // Draw the apple
     BodyPart *current_body_part = head;
+    uint number_of_body_part = 0;
+    bool head_hit_another_body_part = false;
     do {
       (void)mvwprintw(win, current_body_part->y, current_body_part->x, "█");
+      if (current_body_part->x == head->x && current_body_part->y == head->y &&
+          false == head_hit_another_body_part &&
+          current_body_part->next != head->next)
+        head_hit_another_body_part = true;
+
       if (NULL != current_body_part->next)
         current_body_part = (BodyPart *)current_body_part->next;
+      number_of_body_part++;
     } while (NULL != current_body_part->next);
 
     /* When the snake eats an apple, in other words, when the head hits the
@@ -68,12 +76,6 @@ int main(int argc, char *argv[]) {
       new->x = head->x;
       new->y = head->y;
       new->direction = head->direction;
-
-      if (up == head->direction) new->y++;
-      if (down == head->direction) new->y--;
-      if (left == head->direction) new->x++;
-      if (right == head->direction) new->x--;
-
       new->next = (struct BodyPart *)head;
       head = new;
     }
@@ -116,8 +118,9 @@ int main(int argc, char *argv[]) {
     if ('d' == input && left != head->direction) head->direction = right;
 
     // Game over checking
+    // Check if the snake's head hits the window border
     if (head->x < 1 || head->x > WINDOW_SIZE - 2 || head->y < 1 ||
-        head->y > WINDOW_SIZE - 2)
+        head->y > WINDOW_SIZE - 2 || head_hit_another_body_part)
       game_over = true;
   }
 
