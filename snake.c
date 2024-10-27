@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define WINDOW_SIZE 30
@@ -49,19 +50,59 @@ int main(int argc, char *argv[]) {
     (void)box(win, 0, 0);                 // draw the borders of the window
     (void)mvwprintw(win, 0, 1, "Snake");  // Draw the title
     (void)mvwprintw(win, apple_y, apple_x, "*");  // Draw the apple
-    (void)mvwprintw(win, head->y, head->x, "█");  // Draw the snake's head
+    BodyPart *current_body_part = head;
+    do {
+      (void)mvwprintw(win, current_body_part->y, current_body_part->x, "█");
+      if (NULL != current_body_part->next)
+        current_body_part = (BodyPart *)current_body_part->next;
+    } while (NULL != current_body_part->next);
 
-    // Check apple-head collision
+    /* When the snake eats an apple, in other words, when the head hits the
+       apple Move the apple to a new random position and make the snake longer
+     */
     if (apple_y == head->y && apple_x == head->x) {
       apple_x = rand() % (WINDOW_SIZE - 2) + 1;
       apple_y = rand() % (WINDOW_SIZE - 2) + 1;
+
+      BodyPart *new = malloc(sizeof(BodyPart));
+      new->x = head->x;
+      new->y = head->y;
+      new->direction = head->direction;
+
+      if (up == head->direction) new->y++;
+      if (down == head->direction) new->y--;
+      if (left == head->direction) new->x++;
+      if (right == head->direction) new->x--;
+
+      new->next = (struct BodyPart *)head;
+      head = new;
     }
 
-    // Snake's head movement
-    if (up == head->direction) head->y--;
-    if (down == head->direction) head->y++;
-    if (left == head->direction) head->x--;
-    if (right == head->direction) head->x++;
+    // Snake movement
+    // Add a body part to the head
+    BodyPart *new = malloc(sizeof(BodyPart));
+    new->x = head->x;
+    new->y = head->y;
+    new->direction = head->direction;
+
+    if (up == head->direction) new->y--;
+    if (down == head->direction) new->y++;
+    if (left == head->direction) new->x--;
+    if (right == head->direction) new->x++;
+
+    new->next = (struct BodyPart *)head;
+    head = new;
+
+    // TODO: Delete the last body part
+    BodyPart *last_body_part = head;
+    BodyPart *penultimate_body_part = head;
+    while (NULL != last_body_part->next) {
+      last_body_part = (BodyPart *)last_body_part->next;
+      if (NULL != last_body_part->next)
+        penultimate_body_part = (BodyPart *)last_body_part;
+    }
+    penultimate_body_part->next = NULL;
+    free(last_body_part);
 
     // Refresh the screen
     (void)wrefresh(win);
